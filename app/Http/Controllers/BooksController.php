@@ -60,7 +60,7 @@ class BooksController extends Controller
         $cover = null;
 
         if ($request->hasFile('cover')) {
-            $cover = $request->file('cover')->store('cover');
+            $cover = $request->file('cover')->store('public/cover');
         }
 
         Book::create([
@@ -68,7 +68,7 @@ class BooksController extends Controller
             'publisher_id' => $request->publisher_id,
             'title' => $request->title,
             'slug' => Str::slug($request->title),
-            'cover' => $cover,
+            'cover' => str_replace("public","storage",$cover),
             'published_at' => $request->published_at,
         ]);
 
@@ -117,11 +117,13 @@ class BooksController extends Controller
         $cover = $book->cover;
 
         if ($request->hasFile('cover')) {
-            if (Storage::exists($cover)) {
-                Storage::delete($cover);
+            $covers = str_replace("storage","public",$cover);
+            if (Storage::exists($covers)) {
+                Storage::delete($covers);
             }
 
-            $cover = $request->file('cover')->store('cover');
+            $covers = $request->file('cover')->store('public/cover');
+            $cover = str_replace("public","storage",$covers);
         }
 
         $book->update([
@@ -149,7 +151,8 @@ class BooksController extends Controller
         $book = Book::find($id);
 
         if ($book->cover !== null) {
-            Storage::delete($book->cover);
+            $covers = str_replace("storage","public",$cover);
+            Storage::delete($covers);
         }
 
         $book->delete();
